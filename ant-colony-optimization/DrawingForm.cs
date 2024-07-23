@@ -42,6 +42,7 @@ public partial class DrawingForm : Form
     private void btnClear_MouseClick(object? sender, MouseEventArgs e)
     {
         graph.clear_graph();
+        listbox1.Items.Clear();
         panel1.Invalidate(); 
     }
 
