@@ -56,7 +56,7 @@ public class Path {
         this.end = end;
         this.i_end = i_end;
         this.pheromone = pheromone;
-        this.distance = Math.Sqrt( (Math.Abs(start.X - end.X)^2) + (Math.Abs(start.Y - end.Y)^2) );
+        this.distance = Math.Sqrt( Math.Pow(Math.Abs(start.X - end.X),2) + Math.Pow(Math.Abs(start.Y - end.Y),2) );
     }
 }
 
