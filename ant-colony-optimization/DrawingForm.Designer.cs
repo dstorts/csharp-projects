@@ -3,6 +3,7 @@
 partial class DrawingForm
 {
     private Panel panel1;
+    private int dotSize = 10; // Size of the dot that reps a town
     private System.Windows.Forms.Button btnClear, btnRand, btnACO;
     private System.Windows.Forms.ListBox listbox1;
 

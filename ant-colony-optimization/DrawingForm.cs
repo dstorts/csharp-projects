@@ -23,10 +23,10 @@ public partial class DrawingForm : Form
         for(int ti = 0; ti < optimized_path.Count - 1; ti++){
             //draw lines between towns in order
             panel1.CreateGraphics().DrawLine(   pen, 
-                                                graph.map[optimized_path[ti]].X, 
-                                                graph.map[optimized_path[ti]].Y, 
-                                                graph.map[optimized_path[ti + 1]].X, 
-                                                graph.map[optimized_path[ti + 1]].Y
+                                                graph.map[optimized_path[ti]].X + (dotSize /2), 
+                                                graph.map[optimized_path[ti]].Y + (dotSize /2), 
+                                                graph.map[optimized_path[ti + 1]].X + (dotSize /2), 
+                                                graph.map[optimized_path[ti + 1]].Y + (dotSize /2)
                                             );
         }
     }
@@ -55,7 +55,6 @@ public partial class DrawingForm : Form
     {
         Graphics g = panel1.CreateGraphics();
         SolidBrush redBrush = new SolidBrush(Color.Red);
-        int dotSize = 10; // Size of the dot
         g.FillEllipse(redBrush, mx, my, dotSize, dotSize);
     }
 }

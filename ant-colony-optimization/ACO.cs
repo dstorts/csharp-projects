@@ -65,23 +65,23 @@ public class Ant {
     public double distance_traveled;
     public List<int> visited;
     public List<List<double>> path_visibilities;
-    public List<double> path_posibilities;
+    public List<double> path_probabilities;
 
     public Ant(int start_town){
         this.path_visibilities = new List<List<double>>();
-        this.path_posibilities = new List<double>();
+        this.path_probabilities = new List<double>();
         this.distance_traveled = 0;
         this.visited = new List<int>();
         this.cur_town = start_town;
         this.start_town = start_town;
     }
 
-    public void calc_initial_path_vis(List<List<Path>> path_dist_matrix) {
-        this.num_towns = path_dist_matrix.Count;
+    public void calc_initial_path_vis(List<List<Path>> paths_matrix) {
+        this.num_towns = paths_matrix.Count;
         for(int a = 0; a < this.num_towns; a++){
             List<double> a_vis = new List<double>();
             for(int b = 0; b < this.num_towns; b++){
-                double inv_dist = path_dist_matrix[a][b].distance == 0 ? 0 : (1 / path_dist_matrix[a][b].distance);
+                double inv_dist = paths_matrix[a][b].distance == 0 ? 0 : (1 / paths_matrix[a][b].distance);
                 a_vis.Add( inv_dist ); //assign inverse of distance between towns 'a' and 'b'
             }
             path_visibilities.Add(a_vis);
@@ -96,17 +96,17 @@ public class Ant {
         }
     }
 
-    public void calc_new_visit_possibilities(List<List<double>> pheremones, double alpha, double beta) {
+    public void calc_new_visit_possibilities(List<List<Path>> paths, double alpha, double beta) {
         //calculate a list of possibilities to visit each other city from 'cur_town'
-        path_posibilities = new List<double>();
+        path_probabilities = new List<double>();
         double running_total = 0;
-        for(int a = 0; a < pheremones.Count; a++){
-            double prob = Math.Pow(pheremones[cur_town][a],alpha) * Math.Pow(path_visibilities[cur_town][a],beta);
-            path_posibilities.Add( prob );
+        for(int a = 0; a < paths.Count; a++){
+            double prob = Math.Pow(paths[cur_town][a].pheromone,alpha) * Math.Pow(path_visibilities[cur_town][a],beta);
+            path_probabilities.Add( prob );
             running_total += prob;
         }
-        for(int b = 0; b < path_posibilities.Count; b++){
-            path_posibilities[b] = path_posibilities[b] / running_total;
+        for(int b = 0; b < path_probabilities.Count; b++){
+            path_probabilities[b] = path_probabilities[b] / running_total;
         }
     }
 
@@ -115,8 +115,8 @@ public class Ant {
         List<double> cumulative_probs = new List<double>();
         double running_sum = 0;
         //develop a list of probabilities to visit each town. from town 0 to n in order
-        for(int i = 0; i < path_posibilities.Count; i++){
-            running_sum += path_posibilities[i];
+        for(int i = 0; i < path_probabilities.Count; i++){
+            running_sum += path_probabilities[i];
             cumulative_probs.Add(running_sum);
         }
         Random rand = new Random();
@@ -129,13 +129,13 @@ public class Ant {
         return this.start_town;
     }
 
-    public void tour_the_world(List<List<Path>> path_dist_matrix, List<List<double>> pheremones, double alpha, double beta){
-        calc_initial_path_vis(path_dist_matrix);
+    public void tour_the_world(List<List<Path>> paths_matrix, double alpha, double beta){
+        calc_initial_path_vis(paths_matrix);
         while(visited.Count <= this.num_towns){
             visit_town(cur_town);
-            calc_new_visit_possibilities(pheremones, alpha, beta);
+            calc_new_visit_possibilities(paths_matrix, alpha, beta);
             int next_town = choose_next_town();
-            distance_traveled += path_dist_matrix[cur_town][next_town].distance;
+            distance_traveled += paths_matrix[cur_town][next_town].distance;
             cur_town = next_town;
         }
     }
@@ -143,28 +143,23 @@ public class Ant {
 
 public class AntColonyPathOptimization {
     private int num_towns;
-    private List<List<Path>> path_dist_matrix;
-    private List<List<double>> pheremones;
+    private List<List<Path>> paths_matrix;
     private int num_ants = 10;
     private int num_iterations = 200;
     private double evaporation_rate = 0.5;
-    private double alpha = 1.8; //pheremone importance
+    private double alpha = 1.0; //pheremone importance
     private double beta = 2.0; //visibility importance
 
     public AntColonyPathOptimization(Graph world){
         this.num_towns = world.map.Count;
-        this.pheremones = new List<List<double>>();
-        this.path_dist_matrix = new List<List<Path>>();
+        this.paths_matrix = new List<List<Path>>();
         for (int a = 0; a < num_towns; a++){
             List<Path> paths = new List<Path>();
-            List<double> pher = new List<double>();
             for (int b = 0; b < num_towns; b++){
                 //compile a list of paths to from town 'a' to every other town to town 'b' (even to itself)
                 paths.Add(new Path(a, world.map[a], b, world.map[b], 1.0));
-                pher.Add(1.0);
             }
-            path_dist_matrix.Add(paths);
-            pheremones.Add(pher);
+            paths_matrix.Add(paths);
         }
     }
 
@@ -181,7 +176,7 @@ public class AntColonyPathOptimization {
         //now have each ant make a full tour of every town
         foreach (Ant ant in ants)
         {
-            ant.tour_the_world(path_dist_matrix, pheremones, alpha, beta);
+            ant.tour_the_world(paths_matrix, alpha, beta);
         }
         return ants;
     }
@@ -194,12 +189,11 @@ public class AntColonyPathOptimization {
             for (int b = 0; b < num_towns; b++)
             {
                 //evaporation first
-                pheremones[a][b] = pheremones[a][b] * (1 - evaporation_rate);
-                path_dist_matrix[a][b].pheromone = path_dist_matrix[a][b].pheromone * (1 - evaporation_rate);
-                //add pheremones laid by the ants
+                paths_matrix[a][b].pheromone = paths_matrix[a][b].pheromone * (1 - evaporation_rate);
+                //now add pheremones laid by the ants
                 foreach (Ant ant in ants)
                 {
-                    pheremones[a][b] = pheremones[a][b] + (1 / ant.distance_traveled);
+                    paths_matrix[a][b].pheromone = paths_matrix[a][b].pheromone + (1 / ant.distance_traveled);
                 }
             }
         }
