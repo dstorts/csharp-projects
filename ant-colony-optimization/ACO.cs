@@ -189,12 +189,13 @@ public class AntColonyPathOptimization {
     private void UpdatePheremones(List<Ant> ants)
     {
         //update pheremones on all paths
-        //evaporation first
         for (int a = 0; a < num_towns; a++)
         {
             for (int b = 0; b < num_towns; b++)
             {
+                //evaporation first
                 pheremones[a][b] = pheremones[a][b] * (1 - evaporation_rate);
+                path_dist_matrix[a][b].pheromone = path_dist_matrix[a][b].pheromone * (1 - evaporation_rate);
                 //add pheremones laid by the ants
                 foreach (Ant ant in ants)
                 {
