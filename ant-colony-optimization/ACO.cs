@@ -157,7 +157,7 @@ public class AntColonyPathOptimization {
             List<Path> paths = new List<Path>();
             for (int b = 0; b < num_towns; b++){
                 //compile a list of paths to from town 'a' to every other town to town 'b' (even to itself)
-                paths.Add(new Path(a, world.map[a], b, world.map[b], 1.0));
+                paths.Add(new Path(a, world.map[a], b, world.map[b], 3.0));
             }
             paths_matrix.Add(paths);
         }

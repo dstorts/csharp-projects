@@ -40,7 +40,7 @@ partial class DrawingForm
         this.components = new System.ComponentModel.Container();
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 500);
-        this.Text = "Drawing App";
+        this.Text = "Ant Colony Path Optimization";
         this.BackColor = Color.Beige;
 
         this.btnClear = new System.Windows.Forms.Button();
